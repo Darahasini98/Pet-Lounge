@@ -2,7 +2,9 @@ const express = require('express')
 const router = express.Router()
 const User = require('../models/User')
 const { body, validationResult } = require('express-validator');
-
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+const jwtSecret = "qwertyuioplkjhgfdsazxcvbnmqwerty"
 router.post("/loginUser", [
     body('useremail').isEmail(),
     body('userpwd', 'Password Length should be greater than 5').isLength({ min: 5 })
@@ -17,17 +19,28 @@ router.post("/loginUser", [
         }
 
         //res.send(`Hello, ${req.body.person}!`);
-        let email = req.body.useremail;
+        let  email  = req.body.useremail;
+        
+       // console.log(typeof( email),typeof(req.body.useremail));
         try {
-           let userData =  await User.findOne({email});
-           console.log(userData)
+           let userData =  await User.findOne({useremail:email});
+           //console.log(userData)
            if(!userData){
-            return res.status(400).json({errors:"Invalid Creds1"});
+            return res.status(400).json({errors:"Invalid Email"});
            }
-           if(req.body.userpwd !== userData.userpwd){
-            return res.status(400).json({errors:"Invalid Creds2"});
+           const pwdCompare = await bcrypt.compare(req.body.userpwd,userData.userpwd)
+           //if(req.body.userpwd !== userData.userpwd){
+           console.log(pwdCompare)
+           if(!pwdCompare){ 
+           return res.status(400).json({errors:"Invalid Password"});
            }
-           return res.json({success:true});
+           const data={
+            user:{
+                id:userData.id
+            }
+           }
+           const authToken = jwt.sign(data,jwtSecret)
+           return res.json({success:true,authToken:authToken});
            
          
         }

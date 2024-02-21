@@ -1,9 +1,10 @@
 import React from 'react'
 import { useState } from 'react';
+import {useNavigate} from 'react-router-dom'
 export default function Login() {
 
   const [credentials, setcredentials] = useState({ useremail: "", userpwd: "" })
-
+  let navigate = useNavigate()
   const handleSubmit = async (e) => {
     e.preventDefault();
     const response =await fetch("http://localhost:5550/api/loginUser", {
@@ -16,10 +17,12 @@ export default function Login() {
     const resjson = await  response.json()
         console.log(resjson);
 
-    if (!resjson.success) {
-      alert("enter valid credentials")
-    }
-
+    if (resjson.success) {
+      localStorage.setItem("authToken",resjson.authToken);
+      console.log(localStorage.getItem("authToken"));
+      navigate("/profile");
+    }else
+    alert("enter valid credentials");
   }
 
 

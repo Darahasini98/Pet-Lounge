@@ -19,7 +19,9 @@ app.use((req,res,next)=>{
 })
 app.use(express.json())
 app.use('/api',require("./routes/CreateUser"))
+app.use(express.json())
 app.use('/api',require("./routes/LoginUser"))
+app.use('/api',require("./routes/Profile"))
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
